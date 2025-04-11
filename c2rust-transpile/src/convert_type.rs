@@ -5,6 +5,7 @@ use crate::renamer::*;
 use c2rust_ast_builder::{mk, properties::*};
 use failure::format_err;
 use std::collections::{HashMap, HashSet};
+// use std::env;
 use std::ops::Index;
 use syn::*;
 
@@ -22,7 +23,7 @@ pub struct TypeConverter {
     features: HashSet<&'static str>,
 }
 
-pub const RESERVED_NAMES: [&str; 103] = [
+pub const RESERVED_NAMES: [&str; 104] = [
     // Keywords currently in use
     "as",
     "break",
@@ -129,6 +130,9 @@ pub const RESERVED_NAMES: [&str; 103] = [
     "u128",
     "usize",
     "str",
+
+    // ADDED
+    "await",
 ];
 
 impl TypeConverter {
@@ -308,14 +312,53 @@ impl TypeConverter {
             let path = vec!["core", "ffi", "VaList"];
             let ty = mk().path_ty(mk().abs_path(path));
             return Ok(ty);
-        }
+        }       
+
+        // MAKE ENV VARIABLE FOR THIS
+        // let mut size;
+        // match env::var("HW_TARGET") {
+        //     Ok(value) => {
+        //         if (value == "EMCA" || value == "emca" || value == "16") {
+        //             size = 16;
+        //         } else if value == "32" {
+        //             size = 32;
+        //         } else if value == "64" {
+        //             size = 6;
+        //         } else {
+        //             println!("Not a valid HW target, setting to default 64 bits");
+        //             size = 64;
+        //         }
+        //     }
+        //     Err(e) => {
+        //         size = std::mem::size_of::<usize>();
+            // if std::mem::size_of::<usize>() == 8 {
+            //     size
+            // } else if std::mem::size_of::<usize>() == 16 {
+            //     // EMCA
+            // } else {
+            //     // 32 bit;
+            // } 
+        //     }
+        // }
 
         match ctxt.index(ctype).kind {
             CTypeKind::Void => Ok(mk().tuple_ty(vec![])),
             CTypeKind::Bool => Ok(mk().path_ty(mk().path(vec!["bool"]))),
+            // CTypeKind::Short => Ok(mk().path_ty(mk().path(vec!["i16"]))),
+            // CTypeKind::Int => Ok(mk().path_ty(mk().path(vec!["i32"]))),
+            // CTypeKind::Long => Ok(mk().path_ty(mk().path(vec!["i32"]))),
+            // CTypeKind::LongLong => Ok(mk().path_ty(mk().path(vec!["i64"]))),
+            // CTypeKind::UShort => Ok(mk().path_ty(mk().path(vec!["u16"]))),
+            // CTypeKind::UInt => Ok(mk().path_ty(mk().path(vec!["u32"]))),
+            // CTypeKind::ULong => Ok(mk().path_ty(mk().path(vec!["u32"]))),
+            // CTypeKind::ULongLong => Ok(mk().path_ty(mk().path(vec!["u16"]))),
+            // CTypeKind::SChar => Ok(mk().path_ty(mk().path(vec!["i8"]))),
+            // CTypeKind::UChar => Ok(mk().path_ty(mk().path(vec!["u8"]))),
+            // CTypeKind::Char => Ok(mk().path_ty(mk().path(vec!["i8"]))),
+            // CTypeKind::Double => Ok(mk().path_ty(mk().path(vec!["f64"]))),
+            // CTypeKind::Float => Ok(mk().path_ty(mk().path(vec!["f32"]))),
             CTypeKind::Short => Ok(mk().path_ty(mk().path(vec!["libc", "c_short"]))),
-            CTypeKind::Int => Ok(mk().path_ty(mk().path(vec!["i32"]))),
-            // CTypeKind::Int => Ok(mk().path_ty(mk().path(vec!["libc", "c_int"]))),
+            CTypeKind::Int => Ok(mk().path_ty(mk().path(vec!["libc", "c_int"]))),
             CTypeKind::Long => Ok(mk().path_ty(mk().path(vec!["libc", "c_long"]))),
             CTypeKind::LongLong => Ok(mk().path_ty(mk().path(vec!["libc", "c_longlong"]))),
             CTypeKind::UShort => Ok(mk().path_ty(mk().path(vec!["libc", "c_ushort"]))),
